@@ -14,6 +14,20 @@ jobs:
       run:
         working-directory: ems-backend
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: ems
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,6 +40,10 @@ jobs:
           cache: maven
 
       - name: Run unit tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/ems
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
         run: mvn test -B
 
   build-docker:
